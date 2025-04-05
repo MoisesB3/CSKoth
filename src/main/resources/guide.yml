@@ -1,0 +1,86 @@
+# CSKoth Plugin
+
+  A King of the Hill (KOTH) plugin for Minecraft Purpur 1.21.4 servers.
+
+## Features
+
+- Create and manage multiple KOTH zones
+- Customizable capture times and points
+- Real-time tracking of player captures
+- Reward system for successful captures
+- Admin commands to manage KOTH events
+- Player leaderboard system
+- Integration with economy plugins (via server commands)
+
+## Installation
+  
+  1. Download the CSKoth.jar file
+  2. Place it in your server's `plugins` folder
+  3. Restart your server
+  4. The plugin will generate default configuration files
+  
+  ## Configuration
+  
+  ### Main Configuration (config.yml)
+  
+  ```yaml
+# Default capture time in seconds
+default-capture-time: 300
+
+# Default points awarded for capturing a KOTH
+default-capture-points: 1
+
+# Commands to execute when a player captures a KOTH
+# Available placeholders: %player%, %koth%
+rewards:
+  - 'give %player% diamond 5'
+  - 'eco give %player% 1000'
+  ```
+  
+  ### KOTH Zones (koths.yml)
+  
+  This file is automatically managed by the plugin, but can be manually edited if needed.
+
+## Commands
+
+### Admin Commands
+
+- `/cskoth create <name>` - Start creating a new KOTH zone
+- `/cskoth finalize <name>` - Finalize KOTH zone creation
+- `/cskoth delete <name>` - Delete a KOTH zone
+- `/cskoth start <name>` - Start a KOTH event
+- `/cskoth stop <name>` - Stop a KOTH event
+- `/cskoth list` - List all available KOTH zones
+
+### Player Commands
+
+- `/cskoth points [name]` - View points for a specific KOTH or all KOTHs
+
+## Permissions
+
+- `cskoth.use` - Allows access to basic commands (default: true)
+- `cskoth.admin` - Allows access to administrative commands (default: op)
+
+## How It Works
+  
+  1. Admins create KOTH zones using the selection tool
+  2. When a KOTH event is started, players can enter the defined zone
+  3. If a single player remains in the zone, they begin capturing
+  4. The player must stay in the zone for the specified capture time
+  5. When successfully captured, the player receives rewards and points
+  6. If multiple players enter the zone, it becomes contested until only one remains
+
+## Customization
+
+- Configure custom rewards in config.yml
+- Adjust capture times per KOTH zone
+- Set different point values for different zones
+- Integrate with other plugins via the reward command system
+
+## Support
+  
+  For support, feature requests, or bug reports, please create an issue in the GitHub repository or contact the author.
+  
+  ## License
+  
+  This plugin is released under the MIT License. See LICENSE file for details.

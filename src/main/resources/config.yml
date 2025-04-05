@@ -1,0 +1,24 @@
+# CSKoth Configuration File
+
+# Default capture time in seconds
+default-capture-time: 300
+
+# Default points awarded for capturing a KOTH
+default-capture-points: 1
+
+# Broadcast messages about KOTH status every X seconds (0 to disable)
+broadcast-interval: 60
+
+# Commands to execute when a player captures a KOTH
+# Available placeholders: %player%, %koth%
+rewards:
+  - 'give %player% diamond 5'
+  - 'eco give %player% 1000'
+  - 'broadcast &6%player% &ahas been rewarded for capturing &6%koth%&a!'
+
+# Particles and sound effects
+effects:
+  capture-particles: true
+  capture-sound: true
+  contest-particles: true
+  contest-sound: true

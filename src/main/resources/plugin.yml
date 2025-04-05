@@ -1,0 +1,21 @@
+name: CSKoth
+version: 1.0.03
+main: CopeStudios.CSKoth.CSKoth
+api-version: '1.21'
+authors: [Z3R0P01NT]
+description: King of the Hill plugin for Minecraft servers
+commands:
+  cskoth:
+    description: Main command for CSKoth plugin
+    usage: /<command> [subcommand] [arguments]
+    aliases: [koth]
+    permission: cskoth.use
+permissions:
+  cskoth.use:
+    description: Allows users to use basic cskoth commands
+    default: true
+  cskoth.admin:
+    description: Allows users to administer the cskoth plugin
+    default: op
+    children:
+      cskoth.use: true
