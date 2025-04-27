@@ -43,20 +43,47 @@ public class CSKoth extends JavaPlugin implements Listener {
     private KothStatsManager statsManager;
 
     private final String prefix = ChatColor.DARK_GRAY + "[" + ChatColor.GOLD + "CSKoth" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
+    private CSPlaceholders placeholders;
+
+    public CSPlaceholders getPlaceholders() {
+        return placeholders;
+    }
 
     private KothGUI gui;
 
     @Override
     public void onEnable() {
+        // Create data folder and files first
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+
         saveDefaultConfig();
         config = getConfig();
 
-        // Create koths.yml file if it doesn't exist
+        // Create koths.yml file path
         kothsFile = new File(getDataFolder(), "koths.yml");
         if (!kothsFile.exists()) {
-            saveResource("koths.yml", false);
+            try {
+                kothsFile.createNewFile();
+                kothsConfig = new YamlConfiguration();
+                kothsConfig.save(kothsFile);
+            } catch (IOException e) {
+                getLogger().severe("Could not create koths.yml: " + e.getMessage());
+            }
         }
         kothsConfig = YamlConfiguration.loadConfiguration(kothsFile);
+
+        // Initialize message manager (before other components)
+        messageManager = new MessageManager(this);
+
+        // Initialize placeholders
+        placeholders = new CSPlaceholders(this);
+        if (placeholders.register()) {
+            getLogger().info("CSKoth Placeholders registered successfully!");
+        } else {
+            getLogger().warning("Failed to register CSKoth Placeholders!");
+        }
 
         // Initialize stats manager
         statsManager = new KothStatsManager(this);
@@ -64,26 +91,7 @@ public class CSKoth extends JavaPlugin implements Listener {
         // Initialize GUI handler
         gui = new KothGUI(this);
 
-        // Register events
-        getServer().getPluginManager().registerEvents(this, this);
-        getServer().getPluginManager().registerEvents(gui, this);
-
-        // Register commands
-        Objects.requireNonNull(getCommand("cskoth")).setExecutor(new KothCommand(this));
-        Objects.requireNonNull(getCommand("cskoth")).setTabCompleter(new KothTabCompleter(this));
-
-        // Load koths from config
-        loadKoths();
-
-        // Start the scheduler that checks for timed KOTHs
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                checkScheduledKoths();
-            }
-        }.runTaskTimer(this, 20 * 60, 20 * 60); // Check every minute
-
-        getLogger().info("CSKoth has been enabled!");
+        // Rest of your initialization code...
     }
 
     @Override

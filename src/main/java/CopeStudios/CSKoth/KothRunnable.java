@@ -7,13 +7,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KothRunnable extends BukkitRunnable {
+    // Static map to track KOTH-specific information
+    private static final Map<String, KothTrackingInfo> KOTH_TRACKING = new ConcurrentHashMap<>();
+
     private final CSKoth plugin;
     private final String kothName;
     private final KothZone kothZone;
@@ -30,14 +30,33 @@ public class KothRunnable extends BukkitRunnable {
         this.kothZone = kothZone;
         this.captureTime = kothZone.getCaptureTime();
 
+        // Initialize tracking info for this KOTH
+        KothTrackingInfo trackingInfo = new KothTrackingInfo();
+        trackingInfo.setKothCenter(calculateKothCenter());
+        KOTH_TRACKING.put(kothName, trackingInfo);
+
         // Initialize capture points map for this koth
         if (!plugin.getCapturePoints().containsKey(kothName)) {
             plugin.getCapturePoints().put(kothName, new HashMap<>());
         }
     }
 
+    private Location calculateKothCenter() {
+        Location corner1 = kothZone.getCorner1();
+        Location corner2 = kothZone.getCorner2();
+        return new Location(
+                corner1.getWorld(),
+                (corner1.getX() + corner2.getX()) / 2,
+                (corner1.getY() + corner2.getY()) / 2,
+                (corner1.getZ() + corner2.getZ()) / 2
+        );
+    }
+
     @Override
     public void run() {
+        // Tracking info for this specific KOTH
+        KothTrackingInfo trackingInfo = KOTH_TRACKING.get(kothName);
+
         // Get all players in the zone
         List<Player> playersInZone = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -51,15 +70,11 @@ public class KothRunnable extends BukkitRunnable {
             if (captureProgress > 0) {
                 broadcastToNearbyPlayers(plugin.getPrefix() + ChatColor.YELLOW + "KOTH " + ChatColor.GOLD + kothName +
                         ChatColor.YELLOW + " is no longer being captured!");
-                captureProgress = 0;
-                currentCaptor = null;
-                contestedPlayers.clear();
-                contested = false;
+                resetCaptureProgress(trackingInfo);
             }
             return;
         }
-
-        // Update message timer
+// Update message timer
         messageTimer++;
 
         // If only one player in zone
@@ -77,6 +92,10 @@ public class KothRunnable extends BukkitRunnable {
                 }
 
                 captureProgress++;
+                trackingInfo.setCurrentCapturer(playerUUID);
+                trackingInfo.setCurrentCaptureProgress(captureProgress);
+                trackingInfo.setRemainingCaptureTime(captureTime - captureProgress);
+                trackingInfo.setContested(false);
 
                 // Send progress message every 15 seconds
                 if (messageTimer >= 15 || captureProgress == 1) {
@@ -105,8 +124,7 @@ public class KothRunnable extends BukkitRunnable {
                             ChatColor.YELLOW + " points!");
 
                     // Reset capture progress
-                    captureProgress = 0;
-                    messageTimer = 0;
+                    resetCaptureProgress(trackingInfo);
 
                     // Execute rewards
                     giveRewards(player);
@@ -137,6 +155,12 @@ public class KothRunnable extends BukkitRunnable {
                 contested = false;
                 messageTimer = 0;
 
+                // Update tracking info
+                trackingInfo.setCurrentCapturer(playerUUID);
+                trackingInfo.setCurrentCaptureProgress(captureProgress);
+                trackingInfo.setRemainingCaptureTime(captureTime - captureProgress);
+                trackingInfo.setContested(false);
+
                 broadcastToNearbyPlayers(plugin.getPrefix() + ChatColor.GREEN + player.getName() + ChatColor.YELLOW +
                         " is capturing KOTH " + ChatColor.GOLD + kothName + ChatColor.YELLOW + "!");
             }
@@ -148,12 +172,13 @@ public class KothRunnable extends BukkitRunnable {
                 broadcastToNearbyPlayers(plugin.getPrefix() + ChatColor.YELLOW + "KOTH " + ChatColor.GOLD + kothName +
                         ChatColor.YELLOW + " is contested!");
                 contested = true;
-                // We don't reset progress or current captor - we'll keep track of who was capturing first
+                trackingInfo.setContested(true);
 
-                // Track contested players (for stats)
+                // Track contested players (for stats and placeholders)
                 for (Player player : playersInZone) {
                     KothStatsManager.KothPlayerStats stats = plugin.getStatsManager().getPlayerStats(player.getUniqueId());
                     stats.incrementContests();
+                    trackingInfo.addContestedPlayer(player.getUniqueId());
                 }
             }
 
@@ -172,6 +197,77 @@ public class KothRunnable extends BukkitRunnable {
             }
         }
     }
+    // Static method to get tracking info for a specific KOTH
+    public static KothTrackingInfo getKothTrackingInfo(String kothName) {
+        return KOTH_TRACKING.getOrDefault(kothName, new KothTrackingInfo());
+    }
+
+    // Static method to get current capturer name
+    public static String getCurrentCapturerName(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        UUID capturerUUID = info.getCurrentCapturer();
+        if (capturerUUID == null) return "None";
+
+        Player player = Bukkit.getPlayer(capturerUUID);
+        return player != null ? player.getName() : "Unknown";
+    }
+
+    // Static method to get current capture progress
+    public static int getCurrentCaptureProgress(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        return info.getCurrentCaptureProgress();
+    }
+
+    // Static method to get remaining capture time
+    public static int getRemainingCaptureTime(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        return info.getRemainingCaptureTime();
+    }
+
+    // Static method to get contested players names
+    public static String getContestedPlayersNames(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        List<String> playerNames = new ArrayList<>();
+
+        for (UUID uuid : info.getContestedPlayers()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                playerNames.add(player.getName());
+            }
+        }
+
+        return playerNames.isEmpty() ? "None" : String.join(", ", playerNames);
+    }
+
+    // Static method to get KOTH center coordinates
+    public static String getKothCoordinates(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        Location center = info.getKothCenter();
+
+        return center != null
+                ? String.format("%d, %d, %d", center.getBlockX(), center.getBlockY(), center.getBlockZ())
+                : "N/A";
+    }
+
+    // Static method to check if a KOTH is contested
+    public static boolean isKothContested(String kothName) {
+        KothTrackingInfo info = getKothTrackingInfo(kothName);
+        return info.isContested();
+    }
+
+    // Method to reset capture progress
+    private void resetCaptureProgress(KothTrackingInfo trackingInfo) {
+        captureProgress = 0;
+        currentCaptor = null;
+        contestedPlayers.clear();
+        contested = false;
+
+        // Update tracking info
+        trackingInfo.setCurrentCapturer(null);
+        trackingInfo.setCurrentCaptureProgress(0);
+        trackingInfo.setRemainingCaptureTime(0);
+        trackingInfo.setContested(false);
+    }
 
     private String formatTime(int seconds) {
         int minutes = seconds / 60;
@@ -179,6 +275,7 @@ public class KothRunnable extends BukkitRunnable {
         return minutes + ":" + (remainingSeconds < 10 ? "0" : "") + remainingSeconds;
     }
 
+    // Broadcast method
     private void broadcastToNearbyPlayers(String message) {
         // Center of the KOTH
         Location center = new Location(
@@ -196,7 +293,6 @@ public class KothRunnable extends BukkitRunnable {
             }
         }
     }
-
     private void giveRewards(Player player) {
         // Execute command rewards
         List<String> commands = kothZone.getCommandRewards();
@@ -224,6 +320,76 @@ public class KothRunnable extends BukkitRunnable {
             command = command.replace("%player%", player.getName())
                     .replace("%koth%", kothName);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
+    }
+
+    // Inner class for tracking KOTH information
+    public static class KothTrackingInfo {
+        private UUID currentCapturer;
+        private int currentCaptureProgress;
+        private int remainingCaptureTime;
+        private boolean isContested;
+        private List<UUID> contestedPlayers;
+        private Location kothCenter;
+
+        public KothTrackingInfo() {
+            this.currentCapturer = null;
+            this.currentCaptureProgress = 0;
+            this.remainingCaptureTime = 0;
+            this.isContested = false;
+            this.contestedPlayers = new ArrayList<>();
+            this.kothCenter = null;
+        }
+
+        // Getters and Setters
+        public UUID getCurrentCapturer() {
+            return currentCapturer;
+        }
+
+        public void setCurrentCapturer(UUID currentCapturer) {
+            this.currentCapturer = currentCapturer;
+        }
+
+        public int getCurrentCaptureProgress() {
+            return currentCaptureProgress;
+        }
+
+        public void setCurrentCaptureProgress(int currentCaptureProgress) {
+            this.currentCaptureProgress = currentCaptureProgress;
+        }
+
+        public int getRemainingCaptureTime() {
+            return remainingCaptureTime;
+        }
+
+        public void setRemainingCaptureTime(int remainingCaptureTime) {
+            this.remainingCaptureTime = remainingCaptureTime;
+        }
+
+        public boolean isContested() {
+            return isContested;
+        }
+
+        public void setContested(boolean contested) {
+            isContested = contested;
+        }
+
+        public List<UUID> getContestedPlayers() {
+            return contestedPlayers;
+        }
+
+        public void addContestedPlayer(UUID player) {
+            if (!contestedPlayers.contains(player)) {
+                contestedPlayers.add(player);
+            }
+        }
+
+        public Location getKothCenter() {
+            return kothCenter;
+        }
+
+        public void setKothCenter(Location kothCenter) {
+            this.kothCenter = kothCenter;
         }
     }
 }
