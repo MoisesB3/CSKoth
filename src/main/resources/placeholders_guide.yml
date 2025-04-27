@@ -1,0 +1,43 @@
+# CSKoth Placeholders Guide
+
+# Player Statistics
+player_statistics:
+  "%cskoth_captures%": "Number of KOTHs the player has captured"
+  "%cskoth_wins%": "Alias for captures"
+  "%cskoth_contests%": "Number of times the player has contested a KOTH"
+  "%cskoth_rank%": "Player's rank based on number of captures (1 = highest)"
+  "%cskoth_topwins%": "Formatted string of top 10 players by captures"
+
+# Current KOTH Status
+current_koth_status:
+  "%cskoth_active%": "List of currently active KOTHs"
+  "%cskoth_next%": "Name of the next scheduled KOTH"
+  "%cskoth_next_time%": "Start time of the next scheduled KOTH"
+  "%cskoth_next_countdown%": "Time remaining until the next KOTH starts"
+
+# KOTH Zone Information
+koth_zone_info:
+  "%cskoth_points_[name]%": "Points value for capturing the specified KOTH"
+  "%cskoth_captime_[name]%": "Capture time in seconds for the specified KOTH"
+  "%cskoth_status_[name]%": "Status of the specified KOTH (Active/Inactive)"
+
+# KOTH Capture Progress
+koth_capture_progress:
+  "%cskoth_capturer_[name]%": "Name of the player currently capturing the KOTH"
+  "%cskoth_progress_[name]%": "Capture progress for the KOTH (in seconds)"
+  "%cskoth_remaining_[name]%": "Time remaining to capture the KOTH (in seconds)"
+
+# Detailed Tracking
+detailed_tracking:
+  "%cskoth_contested_[name]%": "Whether the KOTH is currently contested (true/false)"
+  "%cskoth_contested_players_[name]%": "Names of players contesting the KOTH"
+  "%cskoth_coordinates_[name]%": "Coordinates of the KOTH center"
+
+# Placeholder Usage Examples
+examples:
+  captures: "%cskoth_captures% → 10"
+  next_koth: "%cskoth_next% → 'Desert KOTH'"
+  koth_points: "%cskoth_points_desert% → '5'"
+  current_capturer: "%cskoth_capturer_desert% → 'PlayerName'"
+  contested_status: "%cskoth_contested_desert% → 'true'"
+  koth_coordinates: "%cskoth_coordinates_desert% → '100, 64, -200'"
