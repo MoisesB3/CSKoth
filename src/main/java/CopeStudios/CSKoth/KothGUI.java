@@ -2,6 +2,7 @@ package CopeStudios.CSKoth;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,7 +27,6 @@ public class KothGUI implements Listener {
     public KothGUI(CSKoth plugin) {
         this.plugin = plugin;
     }
-
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
@@ -77,7 +77,6 @@ public class KothGUI implements Listener {
             }
             return;
         }
-
         // KOTH Manage Menu
         if (title.startsWith(ChatColor.GOLD + "Manage KOTH: ")) {
             event.setCancelled(true);
@@ -109,10 +108,12 @@ public class KothGUI implements Listener {
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.RED + "Back")) {
                 player.closeInventory();
                 openKothListMenu(player);
+            } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.GOLD + "Resize Zone")) {
+                player.closeInventory();
+                openKothResizeMenu(player, kothName);
             }
             return;
         }
-
         // KOTH Settings Menu
         if (title.startsWith(ChatColor.GOLD + "KOTH Settings: ")) {
             event.setCancelled(true);
@@ -160,7 +161,6 @@ public class KothGUI implements Listener {
             }
             return;
         }
-
         // Physical Rewards Menu
         if (title.startsWith(ChatColor.GOLD + "Physical Rewards: ")) {
             // Allow inventory interaction for setting rewards
@@ -235,7 +235,6 @@ public class KothGUI implements Listener {
             }
             return;
         }
-
         // Schedule Menu
         if (title.startsWith(ChatColor.GOLD + "KOTH Schedule: ")) {
             event.setCancelled(true);
@@ -271,8 +270,81 @@ public class KothGUI implements Listener {
             }
             return;
         }
-    }
 
+        // Resize KOTH Menu
+        if (title.startsWith(ChatColor.GOLD + "Resize KOTH: ")) {
+            event.setCancelled(true);
+
+            if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+                return;
+            }
+
+            String kothName = title.substring((ChatColor.GOLD + "Resize KOTH: ").length());
+            KothZone kothZone = plugin.getKothZones().get(kothName);
+
+            if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.GREEN + "Expand KOTH Zone")) {
+                // Expand by 1 in each direction
+                Location corner1 = kothZone.getCorner1();
+                Location corner2 = kothZone.getCorner2();
+
+                int minX = Math.min(corner1.getBlockX(), corner2.getBlockX());
+                int minY = Math.min(corner1.getBlockY(), corner2.getBlockY());
+                int minZ = Math.min(corner1.getBlockZ(), corner2.getBlockZ());
+                int maxX = Math.max(corner1.getBlockX(), corner2.getBlockX());
+                int maxY = Math.max(corner1.getBlockY(), corner2.getBlockY());
+                int maxZ = Math.max(corner1.getBlockZ(), corner2.getBlockZ());
+
+                Location newCorner1 = new Location(corner1.getWorld(), minX - 1, minY - 1, minZ - 1);
+                Location newCorner2 = new Location(corner2.getWorld(), maxX + 1, maxY + 1, maxZ + 1);
+
+                kothZone.setCorners(newCorner1, newCorner2);
+                plugin.saveKoths();
+
+                player.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "KOTH zone expanded by 1 block in all directions.");
+
+                // Reopen the menu to show updated size
+                openKothResizeMenu(player, kothName);
+            }
+            else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.RED + "Shrink KOTH Zone")) {
+                // Shrink by 1 in each direction
+                Location corner1 = kothZone.getCorner1();
+                Location corner2 = kothZone.getCorner2();
+
+                int minX = Math.min(corner1.getBlockX(), corner2.getBlockX());
+                int minY = Math.min(corner1.getBlockY(), corner2.getBlockY());
+                int minZ = Math.min(corner1.getBlockZ(), corner2.getBlockZ());
+                int maxX = Math.max(corner1.getBlockX(), corner2.getBlockX());
+                int maxY = Math.max(corner1.getBlockY(), corner2.getBlockY());
+                int maxZ = Math.max(corner1.getBlockZ(), corner2.getBlockZ());
+
+                // Check if the zone would still be valid after shrinking
+                if (maxX - minX <= 2 || maxY - minY <= 2 || maxZ - minZ <= 2) {
+                    player.sendMessage(plugin.getPrefix() + ChatColor.RED + "KOTH zone is too small to shrink further.");
+                    return;
+                }
+
+                Location newCorner1 = new Location(corner1.getWorld(), minX + 1, minY + 1, minZ + 1);
+                Location newCorner2 = new Location(corner2.getWorld(), maxX - 1, maxY - 1, maxZ - 1);
+
+                kothZone.setCorners(newCorner1, newCorner2);
+                plugin.saveKoths();
+
+                player.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "KOTH zone shrunk by 1 block in all directions.");
+
+                // Reopen the menu to show updated size
+                openKothResizeMenu(player, kothName);
+            }
+            else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.YELLOW + "Manual Selection")) {
+                player.closeInventory();
+                plugin.startZoneSelection(player, kothName);
+            }
+            else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.RED + "Back")) {
+                player.closeInventory();
+                openKothManageMenu(player, kothName);
+            }
+            return;
+        }
+    }
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
@@ -343,7 +415,6 @@ public class KothGUI implements Listener {
 
         player.openInventory(menu);
     }
-
     public void openKothListMenu(Player player) {
         int size = (int) Math.ceil(plugin.getKothZones().size() / 9.0) * 9 + 9;
         size = Math.max(27, Math.min(54, size)); // Min 27, max 54
@@ -455,6 +526,16 @@ public class KothGUI implements Listener {
         scheduleMeta.setLore(scheduleLore);
         scheduleItem.setItemMeta(scheduleMeta);
         menu.setItem(16, scheduleItem);
+
+        // Resize Zone button
+        ItemStack resizeItem = new ItemStack(Material.SCAFFOLDING);
+        ItemMeta resizeMeta = resizeItem.getItemMeta();
+        resizeMeta.setDisplayName(ChatColor.GOLD + "Resize Zone");
+        List<String> resizeLore = new ArrayList<>();
+        resizeLore.add(ChatColor.GRAY + "Change the size of the KOTH zone");
+        resizeMeta.setLore(resizeLore);
+        resizeItem.setItemMeta(resizeMeta);
+        menu.setItem(20, resizeItem);
 
         // Delete button
         ItemStack deleteItem = new ItemStack(Material.TNT);
@@ -609,6 +690,82 @@ public class KothGUI implements Listener {
         backMeta.setDisplayName(ChatColor.RED + "Back");
         backItem.setItemMeta(backMeta);
         menu.setItem(45, backItem);
+
+        player.openInventory(menu);
+    }
+
+    public void openKothResizeMenu(Player player, String kothName) {
+        Inventory menu = Bukkit.createInventory(null, 36, ChatColor.GOLD + "Resize KOTH: " + kothName);
+
+        // Expand button
+        ItemStack expandItem = new ItemStack(Material.LIME_CONCRETE);
+        ItemMeta expandMeta = expandItem.getItemMeta();
+        expandMeta.setDisplayName(ChatColor.GREEN + "Expand KOTH Zone");
+        List<String> expandLore = new ArrayList<>();
+        expandLore.add(ChatColor.GRAY + "Increase the size of the KOTH zone");
+        expandLore.add(ChatColor.GRAY + "by 1 block in all directions");
+        expandMeta.setLore(expandLore);
+        expandItem.setItemMeta(expandMeta);
+        menu.setItem(11, expandItem);
+
+        // Shrink button
+        ItemStack shrinkItem = new ItemStack(Material.RED_CONCRETE);
+        ItemMeta shrinkMeta = shrinkItem.getItemMeta();
+        shrinkMeta.setDisplayName(ChatColor.RED + "Shrink KOTH Zone");
+        List<String> shrinkLore = new ArrayList<>();
+        shrinkLore.add(ChatColor.GRAY + "Decrease the size of the KOTH zone");
+        shrinkLore.add(ChatColor.GRAY + "by 1 block in all directions");
+        shrinkMeta.setLore(shrinkLore);
+        shrinkItem.setItemMeta(shrinkMeta);
+        menu.setItem(15, shrinkItem);
+
+        // Custom size button
+        ItemStack customItem = new ItemStack(Material.YELLOW_CONCRETE);
+        ItemMeta customMeta = customItem.getItemMeta();
+        customMeta.setDisplayName(ChatColor.YELLOW + "Manual Selection");
+        List<String> customLore = new ArrayList<>();
+        customLore.add(ChatColor.GRAY + "Redefine the KOTH zone manually");
+        customLore.add(ChatColor.GRAY + "by setting two corner positions");
+        customMeta.setLore(customLore);
+        customItem.setItemMeta(customMeta);
+        menu.setItem(13, customItem);
+
+        // Current size info
+        KothZone kothZone = plugin.getKothZones().get(kothName);
+        int width = Math.abs(kothZone.getCorner1().getBlockX() - kothZone.getCorner2().getBlockX()) + 1;
+        int height = Math.abs(kothZone.getCorner1().getBlockY() - kothZone.getCorner2().getBlockY()) + 1;
+        int length = Math.abs(kothZone.getCorner1().getBlockZ() - kothZone.getCorner2().getBlockZ()) + 1;
+
+        ItemStack infoItem = new ItemStack(Material.PAPER);
+        ItemMeta infoMeta = infoItem.getItemMeta();
+        infoMeta.setDisplayName(ChatColor.AQUA + "Current Zone Size");
+        List<String> infoLore = new ArrayList<>();
+        infoLore.add(ChatColor.GRAY + "Width: " + ChatColor.YELLOW + width);
+        infoLore.add(ChatColor.GRAY + "Height: " + ChatColor.YELLOW + height);
+        infoLore.add(ChatColor.GRAY + "Length: " + ChatColor.YELLOW + length);
+        infoLore.add(ChatColor.GRAY + "Volume: " + ChatColor.YELLOW + (width * height * length) + " blocks");
+        infoMeta.setLore(infoLore);
+        infoItem.setItemMeta(infoMeta);
+        menu.setItem(22, infoItem);
+
+        // Back button
+        ItemStack backItem = new ItemStack(Material.ARROW);
+        ItemMeta backMeta = backItem.getItemMeta();
+        backMeta.setDisplayName(ChatColor.RED + "Back");
+        backItem.setItemMeta(backMeta);
+        menu.setItem(31, backItem);
+
+        // Filler items
+        ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta fillerMeta = filler.getItemMeta();
+        fillerMeta.setDisplayName(" ");
+        filler.setItemMeta(fillerMeta);
+
+        for (int i = 0; i < 36; i++) {
+            if (menu.getItem(i) == null) {
+                menu.setItem(i, filler);
+            }
+        }
 
         player.openInventory(menu);
     }
