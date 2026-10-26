@@ -1,0 +1,53 @@
+# =============================================================================
+#  CSKoth - config.yml
+#  /cskoth reload after editing. Missing settings are added automatically
+#  (your values are kept). Settings from CSKoth 1.x still work.
+#
+#  KOTHs themselves (zone, capture time, points, schedule, rewards) are set in
+#  the menu (/cskoth) and saved in koths.yml. Player stats are in stats.yml.
+# =============================================================================
+
+# Capture time (seconds) and points a NEW KOTH starts with.
+default-capture-time: 300
+default-capture-points: 1
+
+# Size of a new KOTH made without a wand selection: a box around you.
+# (With the CopeCore wand - /copecore wand - your selection is used instead.)
+default-size:
+  radius: 5     # blocks to each side (5 = 11 wide)
+  below: 1
+  above: 3
+
+# Commands run for EVERY capture of ANY KOTH (each KOTH can have its own too).
+# %player% = the capturer, %koth% = the KOTH. Without the "/".
+rewards:
+  - "broadcast &a%player% has captured the %koth% KOTH!"
+  - "give %player% diamond 5"
+
+# Capture messages go to players this many blocks from the KOTH (0 = everyone).
+broadcast-radius: 3000
+
+# Time zone for scheduled KOTHs, e.g. "America/New_York". "" = the server's.
+timezone: ""
+
+capture:
+  # A KOTH started with /cskoth start (or the menu) ends after the first capture.
+  # false = it keeps running and can be captured again.
+  # (Scheduled KOTHs always end at the first capture; always-on KOTHs pause for
+  # their respawn delay.)
+  end-manual-on-capture: true
+  # Nobody in the zone = the capture is lost.
+  reset-when-empty: true
+  # "X is capturing - time left" message every this many seconds.
+  progress-message-seconds: 15
+
+# A boss bar with the capture progress for players in broadcast-radius.
+bossbar:
+  enabled: true
+  # PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE (turns RED while contested)
+  color: YELLOW
+  # SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+  style: SEGMENTED_10
+
+# Extra logging.
+debug: false

@@ -1,0 +1,28 @@
+# CSKoth - plugin.yml (${project.version} is filled in by Maven)
+name: CSKoth
+version: ${project.version}
+main: us.copestudios.cskoth.CSKoth
+# 1.20 = loads on every server from 1.20.1 up to the newest 1.21.x.
+api-version: '1.20'
+description: King of the Hill - capture zones, schedules, rewards, leaderboards and placeholders.
+author: Cope Studios
+website: https://copestudios.us
+depend: [CopeCore]
+softdepend: [PlaceholderAPI, Multiverse-Core]
+
+commands:
+  cskoth:
+    description: King of the Hill
+    usage: /cskoth help
+    aliases: [koth]
+    permission: cskoth.use
+
+permissions:
+  cskoth.use:
+    description: /cskoth list, next, points, top
+    default: true
+  cskoth.admin:
+    description: The menu and every admin command
+    default: op
+    children:
+      cskoth.use: true

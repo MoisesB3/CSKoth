@@ -1,0 +1,270 @@
+# =============================================================================
+#  CSKoth - messages.yml   (/cskoth reload after editing)
+#
+#  MiniMessage (<gold>, <gradient:...>, <hover:...>, <click:...>) or old & codes
+#  (&6, &#FF5500) - both work, even mixed. Placeholders are written <koth>,
+#  {koth} or %koth% (all three work), so 1.x texts keep working.
+#  The prefix goes in front of every message except lists and menu texts.
+#  Set a message to "" to turn it off.
+#
+#  Upgraded from 1.x? The texts you had changed (codes like E0004) were copied
+#  to their new keys here. Your old file is messages.yml.old.
+# =============================================================================
+
+prefix: "<dark_gray>[<gold>CSKoth</gold>]</dark_gray> "
+
+generic:
+  help-header: "<gold>===== <yellow>CSKoth Commands</yellow> ====="
+  help-line: "<click:suggest_command:'/<command> '><hover:show_text:'<gray>Click to type <gold>/<command>'><gold>/<command> <usage></gold> <gray>- <description></hover></click>"
+  help-footer: ""
+
+command:
+  help:
+    menu: "open the KOTH menu"
+    list: "list all KOTHs"
+    next: "show the next scheduled KOTH"
+    points: "points per player (a KOTH, or the total)"
+    top: "players with the most captures"
+    create: "make a KOTH (wand selection, or a box around you)"
+    setzone: "set a KOTH's zone (wand selection, or type here twice)"
+    start: "start a KOTH (optionally for X minutes)"
+    stop: "stop a KOTH"
+    delete: "delete a KOTH"
+    reload: "reload the config, messages and KOTHs"
+
+# -----------------------------------------------------------------------------
+#  KOTH events. <koth>, and where listed: <time> <x> <y> <z> <world> <minutes>
+# -----------------------------------------------------------------------------
+koth:
+  started: "<yellow>KOTH <gold><koth></gold> has started at <white><x>, <y>, <z></white>! Capture time: <green><time>"
+  auto-started: "<yellow>KOTH <gold><koth></gold> has automatically started at <white><x>, <y>, <z></white>!"
+  ended: "<yellow>KOTH <gold><koth></gold> has ended."
+  time-up: "<yellow>Time's up! KOTH <gold><koth></gold> ended without a winner."
+  respawn-in: "<yellow>KOTH <gold><koth></gold> is back in <green><minutes></green> minutes."
+  you-started: "<green>You started KOTH <gold><koth></gold>."
+  you-stopped: "<yellow>You stopped KOTH <gold><koth></gold>."
+  already-running: "<red>KOTH <gold><koth></gold> is already running."
+  not-running: "<red>KOTH <gold><koth></gold> isn't running."
+  not-found: "<red>KOTH not found: <white><koth>"
+  exists: "<red>A KOTH called <white><koth></white> already exists."
+  bad-name: "<red>KOTH names can only use letters, numbers, - and _ (max 32)."
+  # <size> = width x height x length
+  created: "<green>KOTH <gold><koth></gold> created around you (<white><size></white>). Open <yellow>/cskoth</yellow> to set it up and start it."
+  created-wand: "<green>KOTH <gold><koth></gold> created from your wand selection (<white><size></white>)."
+  deleted: "<green>KOTH <gold><koth></gold> has been deleted."
+
+# Setting a zone with "here" (/cskoth setzone, or the zone menu). <number> = 1 or 2
+zone:
+  corner: "<yellow>Go to corner <gold><number></gold> of KOTH <gold><koth></gold>."
+  same-world: "<red>Both corners must be in the same world - nothing changed."
+  updated: "<green>The zone of <gold><koth></gold> is now <white><size></white>."
+
+# -----------------------------------------------------------------------------
+#  Capturing (sent to players within broadcast-radius, except "captured")
+#  <koth> <player> <time> = time left, <points>
+# -----------------------------------------------------------------------------
+capture:
+  started: "<green><player></green> <yellow>is capturing KOTH <gold><koth></gold>! <gray>(<time>)"
+  progress: "<green><player></green> <yellow>is capturing KOTH <gold><koth></gold> - time left: <green><time>"
+  lost: "<yellow>KOTH <gold><koth></gold> is no longer being captured!"
+  resumed: "<green><player></green> <yellow>has resumed capturing KOTH <gold><koth></gold>!"
+  contested: "<yellow>KOTH <gold><koth></gold> is contested!"
+  contested-progress: "<yellow>KOTH <gold><koth></gold> is contested! <green><player></green> has <green><time></green> capture time remaining."
+  # Sent to everyone
+  captured: "<green><player></green> <yellow>has captured KOTH <gold><koth></gold> and earned <green><points></green> points!"
+  item-rewards: "<green>You received item rewards for capturing the KOTH!"
+
+# Boss bar (plain colors only: & codes or <gold> etc.)
+bossbar:
+  waiting: "<gold><koth></gold> <gray>- step in alone to capture (<white><time></white>)"
+  capturing: "<gold><koth></gold> <gray>- <green><player></green> capturing: <white><time></white> left"
+  contested: "<gold><koth></gold> <gray>- <red>CONTESTED</red> <gray>(<player>: <white><time></white>)"
+
+# -----------------------------------------------------------------------------
+#  /cskoth list, next, points, top
+# -----------------------------------------------------------------------------
+list:
+  header: "<yellow>Available KOTHs:"
+  # <koth> <status> <time> <points> <coords> <world>
+  entry: "<gold>- <koth></gold> <status> <gray>(<time>, <points> pts, <hover:show_text:'<gray><world>: <coords>'><white><coords></white></hover>)"
+  active: "<green>(Active)"
+  inactive: "<red>(Inactive)"
+  empty: "<red>There are no KOTHs configured."
+next:
+  # <koth> <time> = start time, <countdown> = time until then
+  koth: "<yellow>Next KOTH: <gold><koth></gold> at <green><time></green> <gray>(in <countdown>)"
+  none: "<yellow>There are no scheduled KOTHs."
+points:
+  own: "<yellow>You have <green><points></green> points from <green><captures></green> captures."
+  header: "<gold>Points for <koth>:"
+  entry: "<yellow><rank>. <white><player></white>: <green><points>"
+  none: "<gray>No points recorded yet."
+top:
+  header: "<gold>Top 10 KOTH Captures:"
+  entry: "<yellow><rank>. <white><player></white>: <green><captures></green> <gray>(<points> pts)"
+  none: "<gray>Nobody has captured a KOTH yet."
+
+# Words used inside placeholders
+placeholder:
+  active: "Active"
+  inactive: "Inactive"
+  none: "None"
+
+# -----------------------------------------------------------------------------
+#  Menus (/cskoth). No prefix. Each button has .name and .lore.
+# -----------------------------------------------------------------------------
+menu:
+  "on": "<green>ON"
+  "off": "<red>OFF"
+  running: "<green>Active"
+  stopped: "<red>Inactive"
+
+  main:
+    title: "<gold>CSKoth Menu"
+    create:
+      name: "<green>Create KOTH"
+      lore:
+        - "<gray>Create a new King of the Hill zone"
+        - "<gray>(your wand selection, or a box around you)"
+      question: "<yellow>Enter the name for your new KOTH in chat:"
+    list:
+      name: "<aqua>List KOTHs"
+      lore:
+        - "<gray>View and manage your KOTH zones"
+        - "<gray>KOTHs: <white><count>"
+
+  list:
+    title: "<gold>KOTH List"
+    koth:
+      name: "<gold><koth>"
+      lore:
+        - "<gray>Status: <status>"
+        - "<gray>Capture Time: <yellow><time>"
+        - "<gray>Points: <yellow><points>"
+        - ""
+        - "<yellow>Click to manage"
+
+  manage:
+    title: "<gold>Manage KOTH: <koth>"
+    start:
+      name: "<green>Start KOTH"
+      lore: ["<gray>Start this KOTH event"]
+    stop:
+      name: "<red>Stop KOTH"
+      lore: ["<gray>Stop this KOTH event"]
+    settings:
+      name: "<aqua>Edit Settings"
+      lore: ["<gray>Capture time: <white><time>s", "<gray>Points: <white><points>"]
+    rewards:
+      name: "<gold>Rewards"
+      lore: ["<gray>Items: <white><items>", "<gray>Commands: <white><commands>"]
+    schedule:
+      name: "<light_purple>Schedule"
+      lore: ["<gray>Scheduled: <scheduled> <gray>at <white><time>", "<gray>Always on: <always>"]
+    zone:
+      name: "<gold>Zone"
+      lore: ["<gray>Size: <white><size>", "<gray>Grow, shrink or set it again"]
+    teleport:
+      name: "<aqua>Teleport"
+      lore: ["<gray>Go to the middle of the zone"]
+    delete:
+      name: "<red>Delete KOTH"
+      lore: ["<gray>Remove this KOTH zone"]
+
+  settings:
+    title: "<gold>KOTH Settings: <koth>"
+    time:
+      label: "Capture time (seconds)"
+      name: "<yellow>Capture Time: <gold><time>s <gray>(<clock>)"
+      lore: ["<gray>How long one player must hold the zone alone."]
+    points:
+      label: "Points"
+      name: "<yellow>Points: <gold><points>"
+      lore: ["<gray>Points for each capture."]
+
+  rewards:
+    title: "<gold>KOTH Rewards: <koth>"
+    items:
+      name: "<yellow>Item Rewards"
+      lore: ["<gray>Items given to the winner", "<gray>Now: <white><count>"]
+    commands:
+      name: "<yellow>Command Rewards"
+      lore: ["<gray>Commands run when it's captured", "<gray>Now: <white><count></white> (+ <white><global></white> from config.yml for every KOTH)"]
+
+  items:
+    title: "<gold>Item Rewards: <koth>"
+    save:
+      name: "<green>Save Rewards"
+      lore: ["<gray>Put the reward items in the slots above.", "<gray>(Also saved when you close the menu.)"]
+    # <count>
+    saved: "<green>Item rewards saved (<count>)."
+    saved-on-close: "<green>Item rewards saved on close (<count>)."
+
+  commands:
+    title: "<gold>Command Rewards: <koth>"
+    entry:
+      name: "<yellow>Command <number>"
+      lore: ["<white>/<command>", "", "<red>Right-click to remove"]
+    add:
+      name: "<green>Add Command"
+      lore: ["<gray>Type a command in chat.", "<gray>%player% = the winner, %koth% = the KOTH"]
+    question: "<yellow>Enter a command (without the / prefix). %player% = the winner, %koth% = the KOTH:"
+    added: "<green>Command reward added: <yellow><command>"
+    removed: "<green>Command removed!"
+
+  schedule:
+    title: "<gold>KOTH Schedule: <koth>"
+    scheduled:
+      name: "<yellow>Scheduled: <value>"
+      lore: ["<gray>Start by itself every day", "<gray>at the start time. Click to toggle."]
+    time:
+      name: "<yellow>Start Time: <gold><value>"
+      lore: ["<gray>Click and type a time like 18:30"]
+      question: "<yellow>Type the start time (24h), like <gold>18:30</gold>:"
+      invalid: "<red>Type a time like 18:30 (hour 0-23, minute 0-59)."
+      set: "<green>Start time for <gold><koth></gold> set to <yellow><time></yellow>."
+    duration:
+      label: "Duration (minutes)"
+      name: "<yellow>Duration: <gold><value> minutes"
+      lore: ["<gray>A scheduled KOTH ends after this", "<gray>if nobody captured it."]
+    always-on:
+      name: "<yellow>Always On: <value>"
+      lore: ["<gray>Runs all the time and comes back", "<gray>after the respawn delay. Click to toggle."]
+    respawn:
+      label: "Respawn delay (minutes)"
+      name: "<yellow>Respawn Delay: <gold><value> minutes"
+      lore: ["<gray>Time between captures when Always On"]
+
+  zone:
+    title: "<gold>KOTH Zone: <koth>"
+    expand:
+      name: "<green>Expand Zone"
+      lore: ["<gray>Grow by 1 block on every side", "<gray>(shift: 5 blocks)"]
+    shrink:
+      name: "<red>Shrink Zone"
+      lore: ["<gray>Shrink by 1 block on every side", "<gray>(shift: 5 blocks)"]
+    select:
+      name: "<yellow>Set Zone"
+      lore: ["<gray>Uses your CopeCore wand selection,", "<gray>or type 'here' at two corners."]
+    info:
+      name: "<aqua>Current Zone"
+      lore:
+        - "<gray>World: <white><world>"
+        - "<gray>Width: <white><width>"
+        - "<gray>Height: <white><height>"
+        - "<gray>Length: <white><length>"
+        - "<gray>Volume: <white><volume> blocks"
+        - ""
+        - "<yellow>Click to show the outline"
+    expanded: "<green>Zone expanded."
+    shrunk: "<green>Zone shrunk."
+    too-small: "<red>The zone is too small to shrink further."
+
+  delete:
+    title: "<red>Delete <koth>?"
+    confirm:
+      name: "<red>Yes, delete <koth>"
+      lore: ["<gray>Its zone, rewards and points are removed."]
+    cancel:
+      name: "<green>No, keep it"
+      lore: []

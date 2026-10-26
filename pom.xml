@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ============================================================================
+     CSKoth (King of the Hill) - pom.xml
+    ============================================================================
+     Build:   mvn clean package        ->  target/CSKoth-<version>.jar
+
+     IMPORTANT: build and INSTALL CopeCore first (mvn clean install in the
+     CopeCore folder), and keep copecore.version below equal to CopeCore's
+     own version.
+
+     Compiled against the OLDEST supported API (Spigot 1.20.1) with Java 17
+     bytecode, so the jar loads on every server from 1.20.1 up (Java 17 or 21).
+     (Was Gradle + Purpur 1.21.4 + Java 21.)
+    ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>us.copestudios</groupId>
+    <artifactId>cskoth</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+    <name>CSKoth</name>
+    <description>King of the Hill: capture zones, schedules, rewards, leaderboards and placeholders.</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spigot.version>1.20.1-R0.1-SNAPSHOT</spigot.version>
+        <!-- Must match the version in CopeCore's own pom.xml (and be installed with mvn install). -->
+        <copecore.version>1.1.83</copecore.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>spigotmc-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- The server API. "provided" = the server has it, it is NOT put in our jar. -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${spigot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- CopeCore: its own plugin jar on the server (plugin.yml: depend: [CopeCore]). -->
+        <dependency>
+            <groupId>us.copestudios</groupId>
+            <artifactId>copecore</artifactId>
+            <version>${copecore.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- PlaceholderAPI: only for the old %cskoth_...% names (LegacyPapi). Optional on the server. -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>CSKoth-${project.version}</finalName>
+        <resources>
+            <!-- Only plugin.yml is filtered (so ${project.version} is filled in). -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>plugin.yml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>plugin.yml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

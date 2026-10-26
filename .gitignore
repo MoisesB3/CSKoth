@@ -1,0 +1,17 @@
+# Maven
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Old Gradle build (no longer used)
+.gradle/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
